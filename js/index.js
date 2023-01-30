@@ -2,11 +2,16 @@
 Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIxZjc3YWRjOS1iN2Y1LTRmMTEtOGIzZS0yYjJkOWJhMzI0YWQiLCJpZCI6MTIyNjI2LCJpYXQiOjE2NzQ5OTg3NzZ9.6jxTIuBLXZWLhwGAK1Qoli6KC1PMgxXZoDgaizIVkXI";
 
 const viewer = new Cesium.Viewer('cesiumContainer', {
+  timeline: false,
+  sceneModePicker: false,
+  animation: false,
+  // creditContainer : false,
+  CredentialsContainer: false,
   terrainProvider: Cesium.createWorldTerrain()
 });
 
-viewer.animation.container.style.visibility = 'hidden';
-viewer.timeline.container.style.visibility = 'hidden';
+viewer.scene.globe.depthTestAgainstTerrain = true;
+viewer.scene.postProcessStages.fxaa.enabled = true;
 viewer.forceResize();
 
 const osmBuildings = viewer.scene.primitives.add(Cesium.createOsmBuildings());
@@ -39,16 +44,71 @@ fileInput.addEventListener('change', (event) => {
         } catch (error) {
           console.error("Invalid JSON: " + error);
         }
+
         flightData = JSON.parse(jsonResult);
+
+        var rimLightingMaterial = new Cesium.Material({
+          fabric : {
+            type : 'RimLighting',
+            uniforms : {
+              color : Cesium.Color.BLUE
+            }
+          }
+        });
+        
+        // THIS ADDS POINTS INSTEAD OF VECTORS
+        // //Add points
+        // for (let i = 0; i < flightData.length; i++) {
+        //   const dataPoint = flightData[i];
+        
+        //   viewer.entities.add({
+        //     description: `Location: (${dataPoint.longitude}, ${dataPoint.latitude}, ${dataPoint.altitude})`,
+        //     position: Cesium.Cartesian3.fromDegrees(dataPoint.longitude, dataPoint.latitude, dataPoint.altitude),
+        //     point: { pixelSize: 10, color: Cesium.Color.BLUE }
+        //   });
+        // }
+
+        const positions = [];
         for (let i = 0; i < flightData.length; i++) {
           const dataPoint = flightData[i];
-        
-          viewer.entities.add({
-            description: `Location: (${dataPoint.longitude}, ${dataPoint.latitude}, ${dataPoint.altitude})`,
-            position: Cesium.Cartesian3.fromDegrees(dataPoint.longitude, dataPoint.latitude, dataPoint.altitude),
-            point: { pixelSize: 10, color: Cesium.Color.BLUE }
-          });
+          positions.push(Cesium.Cartesian3.fromDegrees(dataPoint.longitude, dataPoint.latitude, dataPoint.altitude));
         }
+        
+        // viewer.entities.add({
+        //   polyline: {
+        //   positions: positions,
+        //   width: 5,
+        //   material: new Cesium.PolylineGlowMaterialProperty({
+        //   glowPower: 0.5,
+        //   color: Cesium.Color.ORANGE
+        //   })
+        //   }
+        //   });
+
+        // viewer.entities.add({
+        //   polyline: {
+        //     positions: positions,
+        //     width: 5,
+        //     material: rimLightingMaterial
+            
+        //   }
+        // });
+
+        
+        viewer.entities.add({
+          polyline: {
+              positions: positions,
+              width: 5,
+              material: new Cesium.PolylineOutlineMaterialProperty({
+                  color: Cesium.Color.BLUE,
+                  outlineWidth: 2,
+                  outlineColor: Cesium.Color.WHITE
+              })
+          }
+      });
+       
+
+
         //log
         console.log(flightData);
 
