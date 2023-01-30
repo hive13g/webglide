@@ -23,6 +23,7 @@ let flightData;
 // let lonFirst;
 // let altFirst;
 const fileInput = document.getElementById('file-input');
+var polylineEntity;
 
 // Get the file input element
 
@@ -95,17 +96,19 @@ fileInput.addEventListener('change', (event) => {
         // });
 
         
-        viewer.entities.add({
-          polyline: {
-              positions: positions,
-              width: 5,
-              material: new Cesium.PolylineOutlineMaterialProperty({
-                  color: Cesium.Color.BLUE,
-                  outlineWidth: 2,
-                  outlineColor: Cesium.Color.BLACK
-              })
-          }
-      });
+        viewer.entities.remove(polylineEntity);
+
+          polylineEntity = viewer.entities.add({
+            polyline: {
+                positions: positions,
+                width: 5,
+                material: new Cesium.PolylineOutlineMaterialProperty({
+                    color: Cesium.Color.BLUE,
+                    outlineWidth: 2,
+                    outlineColor: Cesium.Color.BLACK
+                })
+            }
+          });
        
 
 
