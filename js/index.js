@@ -102,7 +102,7 @@ fileInput.addEventListener('change', (event) => {
               material: new Cesium.PolylineOutlineMaterialProperty({
                   color: Cesium.Color.BLUE,
                   outlineWidth: 2,
-                  outlineColor: Cesium.Color.WHITE
+                  outlineColor: Cesium.Color.BLACK
               })
           }
       });
