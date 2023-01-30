@@ -8,3 +8,7 @@ body {
 #cesiumContainer {
   height: 100%;
 }
+.cesium-credit-textContainer,.cesium-credit-logoContainer,.cesium-credit-expand-link{ 
+  display:none!important; 
+  visibility:hide!important; 
+  } 
