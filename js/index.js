@@ -13,52 +13,36 @@ const viewer = new Cesium.Viewer('cesiumContainer', {
   terrainProvider: Cesium.createWorldTerrain()
 });
 
-// Buttons for Loading igc and selecting shader
 
-// IGC
+// Buttons for Loading igc and selecting shader
+// IGC-BUTTON
 window.viewer = viewer;
 const toolbar = document.querySelector("div.cesium-viewer-toolbar");
 const modeButton = document.querySelector("span.cesium-sceneModePicker-wrapper");
-const igcButton = document.createElement('input');
+const igcButton = document.getElementById('inputButton');
 igcButton.classList.add("cesium-button", "cesium-toolbar-button");
-// document.getElementById('input').style.visibility = "hidden";
-igcButton.innerHTML = "igc";
-igcButton.type = 'file';
 toolbar.insertBefore(igcButton, modeButton);
-
-// SHADER
-const shdButton = document.createElement("button");
-// shdButton.classList.add("cesium-button", "cesium-toolbar-button");
+// SHADER-BUTTON
+const shdButton = document.createElement('button');
+shdButton.classList.add("cesium-button", "cesium-toolbar-button");
 shdButton.innerHTML = "shd";
+// shdButton.className = "collapsible"
 toolbar.insertBefore(shdButton, modeButton); 
 
 
-// Visual settings
+
+// VISUAL SETTINGS
 viewer.scene.globe.depthTestAgainstTerrain = true;
 viewer.scene.postProcessStages.fxaa.enabled = true;
 viewer.forceResize();
 
 const osmBuildings = viewer.scene.primitives.add(Cesium.createOsmBuildings());
-// const igcData = 'js/glide.igc';
 let igcData;
 let jsonResult;
 let flightData;
-// let latFirst;
-// let lonFirst;
-// let altFirst;
-
-
-
-// Create and append new Toolbar Element
-// var fileLoad = document.createElement("div");
-//     fileLoad.className = "cesium-viewer-fileLoader";
-//     toolbar.appendChild(fileLoad);
-
-
-
 
 // Get the file input element
-const fileInput = document.getElementById('file-input');
+const fileInput = document.getElementById('fileInput');
 // Listen for changes to the file input element
 fileInput.addEventListener('change', (event) => {
     // Get the first selected file
@@ -80,14 +64,7 @@ fileInput.addEventListener('change', (event) => {
 
         flightData = JSON.parse(jsonResult);
 
-        var rimLightingMaterial = new Cesium.Material({
-          fabric : {
-            type : 'RimLighting',
-            uniforms : {
-              color : Cesium.Color.BLUE
-            }
-          }
-        });
+        
         
         // THIS ADDS POINTS INSTEAD OF VECTORS
         // //Add points
@@ -101,55 +78,38 @@ fileInput.addEventListener('change', (event) => {
         //   });
         // }
 
+        var rimLightingMaterial = new Cesium.Material({
+          fabric : {
+            type : 'RimLighting',
+            uniforms : {
+              color : Cesium.Color.ORANGE
+            }
+          }
+        });
+        const materialGlow = new Cesium.PolylineGlowMaterialProperty({glowPower: 0.1, taperPower: 0.1, color: Cesium.Color.ORANGE})
+
         const positions = [];
         for (let i = 0; i < flightData.length; i++) {
           const dataPoint = flightData[i];
           positions.push(Cesium.Cartesian3.fromDegrees(dataPoint.longitude, dataPoint.latitude, dataPoint.altitude));
         }
         
+
         viewer.entities.add({
           polyline: {
             positions: positions,
             width: 5,
-            material: new Cesium.PolylineGlowMaterialProperty({
-              glowPower: 0.1,
-              taperPower: 0.1,
-              color: Cesium.Color.ORANGE
-              })
+            material: materialGlow
             }
         });
-
-        // viewer.entities.add({
-        //   polyline: {
-        //     positions: positions,
-        //     width: 5,
-        //     material: rimLightingMaterial
-            
-        //   }
-        // });
-
-        
-        // viewer.entities.add({
-        //   polyline: {
-        //       positions: positions,
-        //       width: 5,
-        //       material: new Cesium.PolylineOutlineMaterialProperty({
-        //           color: Cesium.Color.BLUE,
-        //           outlineWidth: 2,
-        //           outlineColor: Cesium.Color.BLACK
-        //       })
-        //   }
-        // });
-       
-
 
         //log
         console.log(flightData);
 
-        // get the first coordinate 
+
+        // get the first coordinate and Camera Position
         const firstCoordinate = Cesium.Cartesian3.fromDegrees(flightData[0].longitude, flightData[0].latitude, flightData[0].altitude);
         const firstCameraPos = Cesium.Cartesian3.fromDegrees(flightData[0].longitude+1000, flightData[0].latitude+1000, flightData[0].altitude+1000);
-
         // viewer.camera.lookAt(firstCoordinate, new Cesium.HeadingPitchRange(0, Cesium.Math.toRadians(-90)));
         viewer.camera.flyTo({
           destination : firstCameraPos,

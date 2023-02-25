@@ -10,10 +10,13 @@
 
 </head>
 <body>
-  <input type="file" id="file-input" accept=".igc">
+  <input type="file" id="fileInput" accept=".igc" value="igc" hidden>
+  <label for="fileInput" id="inputButton">igc</label>
+  
   <div id="cesiumContainer"></div>
   
   <!-- <script type="text/javascript" src="js/flight.json"></script> -->
+  <!-- <script type="module" src="js/igctojson.js"></script> -->
   <script type="module" src="js/index.js"></script>
 </body>
 </html>
