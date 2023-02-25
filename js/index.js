@@ -1,6 +1,9 @@
 // Grant CesiumJS access to your ion assets
 Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIxZjc3YWRjOS1iN2Y1LTRmMTEtOGIzZS0yYjJkOWJhMzI0YWQiLCJpZCI6MTIyNjI2LCJpYXQiOjE2NzQ5OTg3NzZ9.6jxTIuBLXZWLhwGAK1Qoli6KC1PMgxXZoDgaizIVkXI";
 
+// const viewer = new Cesium.CesiumWidget("cesiumContainer",
+// const viewer = new Cesium.Viewer('cesiumContainer',
+
 const viewer = new Cesium.Viewer('cesiumContainer', {
   timeline: false,
   sceneModePicker: false,
@@ -10,6 +13,27 @@ const viewer = new Cesium.Viewer('cesiumContainer', {
   terrainProvider: Cesium.createWorldTerrain()
 });
 
+// Buttons for Loading igc and selecting shader
+
+// IGC
+window.viewer = viewer;
+const toolbar = document.querySelector("div.cesium-viewer-toolbar");
+const modeButton = document.querySelector("span.cesium-sceneModePicker-wrapper");
+const igcButton = document.createElement('input');
+igcButton.classList.add("cesium-button", "cesium-toolbar-button");
+// document.getElementById('input').style.visibility = "hidden";
+igcButton.innerHTML = "igc";
+igcButton.type = 'file';
+toolbar.insertBefore(igcButton, modeButton);
+
+// SHADER
+const shdButton = document.createElement("button");
+// shdButton.classList.add("cesium-button", "cesium-toolbar-button");
+shdButton.innerHTML = "shd";
+toolbar.insertBefore(shdButton, modeButton); 
+
+
+// Visual settings
 viewer.scene.globe.depthTestAgainstTerrain = true;
 viewer.scene.postProcessStages.fxaa.enabled = true;
 viewer.forceResize();
@@ -22,11 +46,19 @@ let flightData;
 // let latFirst;
 // let lonFirst;
 // let altFirst;
-const fileInput = document.getElementById('file-input');
-var polylineEntity;
+
+
+
+// Create and append new Toolbar Element
+// var fileLoad = document.createElement("div");
+//     fileLoad.className = "cesium-viewer-fileLoader";
+//     toolbar.appendChild(fileLoad);
+
+
+
 
 // Get the file input element
-
+const fileInput = document.getElementById('file-input');
 // Listen for changes to the file input element
 fileInput.addEventListener('change', (event) => {
     // Get the first selected file
@@ -75,16 +107,17 @@ fileInput.addEventListener('change', (event) => {
           positions.push(Cesium.Cartesian3.fromDegrees(dataPoint.longitude, dataPoint.latitude, dataPoint.altitude));
         }
         
-        // viewer.entities.add({
-        //   polyline: {
-        //   positions: positions,
-        //   width: 5,
-        //   material: new Cesium.PolylineGlowMaterialProperty({
-        //   glowPower: 0.5,
-        //   color: Cesium.Color.ORANGE
-        //   })
-        //   }
-        //   });
+        viewer.entities.add({
+          polyline: {
+            positions: positions,
+            width: 5,
+            material: new Cesium.PolylineGlowMaterialProperty({
+              glowPower: 0.1,
+              taperPower: 0.1,
+              color: Cesium.Color.ORANGE
+              })
+            }
+        });
 
         // viewer.entities.add({
         //   polyline: {
@@ -96,19 +129,17 @@ fileInput.addEventListener('change', (event) => {
         // });
 
         
-        viewer.entities.remove(polylineEntity);
-
-          polylineEntity = viewer.entities.add({
-            polyline: {
-                positions: positions,
-                width: 5,
-                material: new Cesium.PolylineOutlineMaterialProperty({
-                    color: Cesium.Color.BLUE,
-                    outlineWidth: 2,
-                    outlineColor: Cesium.Color.BLACK
-                })
-            }
-          });
+        // viewer.entities.add({
+        //   polyline: {
+        //       positions: positions,
+        //       width: 5,
+        //       material: new Cesium.PolylineOutlineMaterialProperty({
+        //           color: Cesium.Color.BLUE,
+        //           outlineWidth: 2,
+        //           outlineColor: Cesium.Color.BLACK
+        //       })
+        //   }
+        // });
        
 
 
