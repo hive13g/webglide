@@ -170,17 +170,7 @@ fileInput.addEventListener('change', (event) => {
           const dataPoint = flightData[i];
           positions.push(Cesium.Cartesian3.fromDegrees(dataPoint.longitude, dataPoint.latitude, dataPoint.altitude));
         }
-
-        //var
-        entity =[];
-        entity = viewer.entities.add({
-          polyline: {
-            positions: positions,
-            width: 5,
-            material: defaultMaterial,
-            }
-        });
-
+        
         entity2 =[];
         entity = viewer.entities.add({
           polyline: {
@@ -190,6 +180,17 @@ fileInput.addEventListener('change', (event) => {
             clampToGround: true
             }
         });
+
+        entity =[];
+        entity = viewer.entities.add({
+          polyline: {
+            positions: positions,
+            width: 5,
+            material: defaultMaterial,
+            }
+        });
+
+        
 
         //log
         console.log(flightData);
