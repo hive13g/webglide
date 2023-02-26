@@ -1,8 +1,7 @@
 //TODO:
-//Coordinate Shift
 //get rid of unfunctional maps
 //create materials
-//cast shadow to ground/alternativ: draw 2nd polyline in 2d on ground and toggle with checkbox
+//toggle grund projection with checkbox
 //Fehler wenn farbe geändert wird bevor igc geladen ist
 //Besseren ColorPicker hinzufügen --> siehe downloads
 
@@ -70,23 +69,24 @@ console.log("hex color is: "+pickedHexColor);
 console.log("rgb color is: "+polyRgbColor);
 
 colButton.addEventListener('change',(event) => {
-  polyRgbColor = new Cesium.Color(pickedHexColor.convertToRGB());
+  polyRgbColor = pickedHexColor.convertToRGB();//new Cesium.Color(pickedHexColor.convertToRGB());
   pickedHexColor = colButton.value;
   entity.polyline.material.color = pickedHexColor.convertToRGB();
   console.log("applied color is: "+entity.polyline.material.color);
 })
 
 //MATERIALS
-//colorstyle:
-//Cesium.Color.ORANGE
 var entity = [];
-var entity2 = [];
 var positions = [];
-var positions2 = [];
-var material1 = new Cesium.PolylineGlowMaterialProperty({glowPower: 0.2, taperPower: 0.7, color: polyRgbColor}); 
-var material2 = new Cesium.PolylineGlowMaterialProperty({glowPower: 1, taperPower: 1, color: polyRgbColor});
-var material3 = new Cesium.PolylineOutlineMaterialProperty({color: polyRgbColor, outlineWidth: 1});
-var material4 = new Cesium.PolylineOutlineMaterialProperty({color: polyRgbColor, outlineWidth: 1});
+
+var entity2 = [];
+
+
+var material1 = new Cesium.PolylineGlowMaterialProperty({glowPower: 0.2, taperPower: 0.7, color: pickedHexColor.convertToRGB()}); 
+var material2 = new Cesium.PolylineGlowMaterialProperty({glowPower: 0.8, taperPower: 1, color: pickedHexColor.convertToRGB()});
+var material3 = new Cesium.PolylineOutlineMaterialProperty({color: pickedHexColor.convertToRGB(), outlineColor: Cesium.Color.WHITE, outlineWidth: 3});
+var material4 = new Cesium.PolylineOutlineMaterialProperty({color: pickedHexColor.convertToRGB(), outlineWidth: 3});
+var material5 = new Cesium.PolylineOutlineMaterialProperty({color: Cesium.Color.GREY, outlineWidth: 1});
 var defaultMaterial = material1;
 
 const materialSelect = document.getElementById('shaders');
@@ -99,23 +99,27 @@ function changeShader(){
   switch(materialSelect.value){
     case 's1':
       entity.polyline.material = material1;
+      entity.polyline.material.color = pickedHexColor.convertToRGB();
       console.log("material1: "+entity.polyline.material.color);
       break;
     case 's2':
       entity.polyline.material = material2;
+      entity.polyline.material.color = pickedHexColor.convertToRGB();
       console.log("material2: "+entity.polyline.material.color);
       break;
     case 's3':
       entity.polyline.material = material3;
+      entity.polyline.material.color = pickedHexColor.convertToRGB();
       console.log("material3: "+entity.polyline.material.color);
       break;
     case 's4':
       entity.polyline.material = material4;
+      entity.polyline.material.color = pickedHexColor.convertToRGB();
       console.log("material4: "+entity.polyline.material.color);
       break;
     default:
       entity.polyline.material = defaultMaterial;
-      entity.polyline.color = polyRgbColor;
+      entity.polyline.material.color = pickedHexColor.convertToRGB();
   };
   entity.polyline.color = polyRgbColor;
 };
@@ -166,12 +170,6 @@ fileInput.addEventListener('change', (event) => {
           const dataPoint = flightData[i];
           positions.push(Cesium.Cartesian3.fromDegrees(dataPoint.longitude, dataPoint.latitude, dataPoint.altitude));
         }
-        
-        positions2 = [];
-        for (let i = 0; i < flightData.length; i++) {
-          const dataPoint = flightData[i];
-          positions.push(Cesium.Cartesian3.fromDegrees(dataPoint.longitude, dataPoint.latitude, 0));
-        }
 
         //var
         entity =[];
@@ -179,16 +177,17 @@ fileInput.addEventListener('change', (event) => {
           polyline: {
             positions: positions,
             width: 5,
-            material: defaultMaterial
+            material: defaultMaterial,
             }
         });
 
         entity2 =[];
-        entity2 = viewer.entities.add({
+        entity = viewer.entities.add({
           polyline: {
-            positions: positions2,
+            positions: positions,
             width: 5,
-            material: defaultMaterial
+            material: material5,
+            clampToGround: true
             }
         });
 
