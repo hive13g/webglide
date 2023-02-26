@@ -1,13 +1,10 @@
 //TODO:
 //Coordinate Shift
 //get rid of unfunctional maps
-//colorpicker for Polylines
-//in CZML für animation umwandeln
 //create materials
-//cast shadow to ground
+//cast shadow to ground/alternativ: draw 2nd polyline in 2d on ground and toggle with checkbox
 //Fehler wenn farbe geändert wird bevor igc geladen ist
-//select liste setzt nicht zurück
-
+//Besseren ColorPicker hinzufügen --> siehe downloads
 
 //INITIALISATION
 // Grant CesiumJS access to your ion assets
@@ -83,7 +80,9 @@ colButton.addEventListener('change',(event) => {
 //colorstyle:
 //Cesium.Color.ORANGE
 var entity = [];
+var entity2 = [];
 var positions = [];
+var positions2 = [];
 var material1 = new Cesium.PolylineGlowMaterialProperty({glowPower: 0.2, taperPower: 0.7, color: polyRgbColor}); 
 var material2 = new Cesium.PolylineGlowMaterialProperty({glowPower: 1, taperPower: 1, color: polyRgbColor});
 var material3 = new Cesium.PolylineOutlineMaterialProperty({color: polyRgbColor, outlineWidth: 1});
@@ -167,11 +166,27 @@ fileInput.addEventListener('change', (event) => {
           const dataPoint = flightData[i];
           positions.push(Cesium.Cartesian3.fromDegrees(dataPoint.longitude, dataPoint.latitude, dataPoint.altitude));
         }
+        
+        positions2 = [];
+        for (let i = 0; i < flightData.length; i++) {
+          const dataPoint = flightData[i];
+          positions.push(Cesium.Cartesian3.fromDegrees(dataPoint.longitude, dataPoint.latitude, 0));
+        }
+
         //var
         entity =[];
         entity = viewer.entities.add({
           polyline: {
             positions: positions,
+            width: 5,
+            material: defaultMaterial
+            }
+        });
+
+        entity2 =[];
+        entity2 = viewer.entities.add({
+          polyline: {
+            positions: positions2,
             width: 5,
             material: defaultMaterial
             }
@@ -211,23 +226,17 @@ function convertIgcToJson(igcData) {
           // Extract the latitude, longitude, and altitude from the line
           const latitude = line.substring(7, 15);//1519094N
           const longitude = line.substring(15, 24);//00832713E
-          const altitude = line.substring(30, 35);
+          const altitude = line.substring(25, 30);
           console.log("latitude: "+latitude);
           console.log("longitude: "+longitude);
           // Convert the latitude and longitude to decimal degrees
-          //        Latitude Longitude
-          //        01234567 012345678
-          //        7     14 15     23
-          //        DDMMmmm  DDDMMmmm
-          //B130512 1519094N 00832713E A0086700720
-          const latDecimal = latitude.slice(0, 2) + '.' + latitude.slice(2, 7);
-          // const latDecimal = (Math.round((parseInt(latitude.slice(0,2)) + parseInt(latitude.slice(2,4))/60 + parseInt(latitude.slice(4,7))/3600)*100000)/100000).toString();
+          
+          const latDecimal = parseFloat(latitude.slice(0, 2)) + parseFloat(latitude.slice(2, 7)) / 6e4;
           console.log(latDecimal);
-          const lonDecimal = longitude.slice(0, 3) + '.' + longitude.slice(3, 8);
-          // const lonDecimal = (Math.round((parseInt(longitude.slice(0,3)) + parseInt(longitude.slice(3,5))/60 + parseInt(longitude.slice(5,8))/3600)*100000)/100000).toString();
+          const lonDecimal = parseFloat(longitude.slice(0, 3)) + parseFloat(longitude.slice(3, 8)) / 6e4;
           console.log(lonDecimal);
           // Convert the altitude to meters
-          const altMeters = parseFloat(altitude)+150;
+          const altMeters = parseFloat(altitude);
           // Add the data to the jsonData array as an object
 
           // if(latitude.charAt(23)="S"){latDecimal=latDecimal*(-1)};
