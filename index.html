@@ -5,18 +5,26 @@
   <title>WebGlide</title>
   <link rel="icon" type="image/x-icon" href="images/favicon.ico?">
   <script src="https://cesium.com/downloads/cesiumjs/releases/1.101/Build/Cesium/Cesium.js"></script>
+  <script src = "https://sandcastle.cesium.com/Sandcastle-header.js"></script>
   <link href="https://cesium.com/downloads/cesiumjs/releases/1.101/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
   <link href="css/style.css" rel="stylesheet">
 
 </head>
 <body>
   <input type="file" id="fileInput" accept=".igc" value="igc" hidden>
+  <input type="color" id="colpick" hidden>
   <label for="fileInput" id="inputButton">igc</label>
   
   <div id="cesiumContainer"></div>
   
-  <!-- <script type="text/javascript" src="js/flight.json"></script> -->
-  <!-- <script type="module" src="js/igctojson.js"></script> -->
+  <select id="shaders" name="shaders"> <!--onchange="change();"-->
+    <option value="s1" selected>Form 1</option>
+    <option value="s2">Form 2</option>
+    <option value="s3">Form 3</option>
+    <option value="s4">Form 4</option>
+  </select>
+  <!-- <input type="hidden"> -->
+
   <script type="module" src="js/index.js"></script>
 </body>
 </html>

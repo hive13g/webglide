@@ -13,22 +13,22 @@ body {
   visibility:hide!important; 
   } 
 label{
-  display: inline-block;
-  /* display: flex; */
-  /* align-items: center; */
+  /* display: inline-block;
+  display: flex;
+  align-items: center; */
   font-weight: bold;
   text-align: center;
-  vertical-align: middle;
+  /* vertical-align: middle;
   background-color: rgb(0, 61, 130);
-  color: white;
+  color: rgb(255, 255, 255);
   padding: 1rem;
   font-family: sans-serif;
   border-radius: 0.3rem;
-  cursor: pointer;
-  margin-top: 2rem;
+  cursor: pointer;*/
+  margin: auto; 
 }
 
-input::file-selector-button {
+/* input::file-selector-button {
   font-weight: bold;
   vertical-align: middle;
   margin: 0px;
@@ -36,30 +36,4 @@ input::file-selector-button {
   padding: 0em;
   border: thin solid grey;
   border-radius: 3px;
-}
-
- /* Style the button that is used to open and close the collapsible content */
- .collapsible {
-  background-color: #eee;
-  color: #444;
-  cursor: pointer;
-  padding: 18px;
-  width: 100%;
-  border: none;
-  text-align: left;
-  outline: none;
-  font-size: 15px;
-}
-
-/* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
-.active, .collapsible:hover {
-  background-color: #ccc;
-}
-
-/* Style the collapsible content. Note: hidden by default */
-.content {
-  padding: 0 18px;
-  display: none;
-  overflow: hidden;
-  background-color: #f1f1f1;
-} 
+} */
