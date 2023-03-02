@@ -11,29 +11,60 @@ body {
 .cesium-credit-textContainer,.cesium-credit-logoContainer,.cesium-credit-expand-link{ 
   display:none!important; 
   visibility:hide!important; 
-  } 
-label{
-  /* display: inline-block;
-  display: flex;
-  align-items: center; */
+  }
+
+select{
   font-weight: bold;
-  text-align: center;
-  /* vertical-align: middle;
-  background-color: rgb(0, 61, 130);
-  color: rgb(255, 255, 255);
-  padding: 1rem;
-  font-family: sans-serif;
-  border-radius: 0.3rem;
-  cursor: pointer;*/
-  margin: auto; 
 }
 
-/* input::file-selector-button {
+option { 
   font-weight: bold;
+}
+
+.ui-elements{
+  font-weight: bold;
+}
+
+label{
+  display: block;
+  font-weight: bold;
+  text-align: center;
+}
+
+input[type=checkbox] {
   vertical-align: middle;
-  margin: 0px;
-  color: dodgerblue;
-  padding: 0em;
-  border: thin solid grey;
-  border-radius: 3px;
-} */
+  position: relative;
+  bottom: 1px;
+}
+
+#checkDiv {
+  position: absolute;
+    top: 50px;
+    right: 5px;
+    width: 95px;
+    height: 20px;
+    padding: 5px;
+    border: 0px;
+    
+}
+
+body{
+  background-color:black;
+}
+
+#inputPicker{
+  position: absolute;
+    top: 90px;
+    right: 5px;
+    width: 105px;
+    height: 30px;
+    border-radius:5px;
+}
+
+#shaders{
+  position: absolute;
+    top: 130px;
+    right: 5px;
+    width: 105px;
+    height: 30px;
+}

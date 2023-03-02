@@ -5,26 +5,43 @@
   <title>WebGlide</title>
   <link rel="icon" type="image/x-icon" href="images/favicon.ico?">
   <script src="https://cesium.com/downloads/cesiumjs/releases/1.101/Build/Cesium/Cesium.js"></script>
-  <script src = "https://sandcastle.cesium.com/Sandcastle-header.js"></script>
   <link href="https://cesium.com/downloads/cesiumjs/releases/1.101/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
   <link href="css/style.css" rel="stylesheet">
-
+  <!-- <link rel="stylesheet" href="https://unpkg.com/huebee@2/dist/huebee.min.css">
+  <script src="https://unpkg.com/huebee@2/dist/huebee.pkgd.min.js"></script> -->
+  <link rel="stylesheet" href="css/huebee.min.css">
+  <script type="text/javascript" src="js/huebee.min.js"></script>
+  
 </head>
 <body>
-  <input type="file" id="fileInput" accept=".igc" value="igc" hidden>
-  <input type="color" id="colpick" hidden>
+  <!-- IGC LOAD -->
+  <input type="file" id="fileInput" accept=".igc" hidden>
   <label for="fileInput" id="inputButton">igc</label>
+
+
+  <!-- SHADOWS -->
+  <div id="checkDiv" class="ui-elements">
+    <label id="shadowCheckboxLabel">
+      <input type="checkbox" id="shadowCheckboxId" checked="false">
+      shadows
+    </label>
+  </div>
+
+  <!-- COLORPICKER -->
+  <button class="color-input ui-elements" id="inputPicker">Farbe</button>
+
+  <!-- FORMS -->
+  <select id="shaders" name="shaders" class="ui-elements">
+    <option value="s1" selected>Stil 1</option>
+    <option value="s2">Stil 2</option>
+    <option value="s3">Stil 3</option>
+    <option value="s4">Stil 4</option>
+  </select>
   
   <div id="cesiumContainer"></div>
-  
-  <select id="shaders" name="shaders"> <!--onchange="change();"-->
-    <option value="s1" selected>Form 1</option>
-    <option value="s2">Form 2</option>
-    <option value="s3">Form 3</option>
-    <option value="s4">Form 4</option>
-  </select>
-  <!-- <input type="hidden"> -->
-
+ 
   <script type="module" src="js/index.js"></script>
+
+  <!-- <div id="clr-picker" class="clr-picker clr-default clr-light clr-top" style="left: 330px; top: 356.767px; color: rgb(0, 208, 255);" data-minimal="false"><input id="clr-color-value" name="clr-color-value" class="clr-color" type="text" value="" spellcheck="false" aria-label="Color value field"><div id="clr-color-area" class="clr-gradient" role="application" aria-label="Saturation and brightness selector. Use up, down, left and right arrow keys to select." style=""><div id="clr-color-marker" class="clr-marker" tabindex="0" aria-label="Saturation: 100. Brightness: 80." style="color: rgb(0, 165, 204); left: 200px; top: 20px;"></div></div><div class="clr-hue"><input id="clr-hue-slider" name="clr-hue-slider" type="range" min="0" max="360" step="1" aria-label="Hue slider"><div id="clr-hue-marker" style="left: 53.0556%;"></div></div><div class="clr-alpha" style="color: rgb(0, 165, 204);"><input id="clr-alpha-slider" name="clr-alpha-slider" type="range" min="0" max="100" step="1" aria-label="Opacity slider"><div id="clr-alpha-marker" style="color: rgb(0, 165, 204); left: 100%;"></div><span style=""></span></div><div id="clr-format" class="clr-format" style="display: none;"><fieldset class="clr-segmented"><legend>Color format</legend><input id="clr-f1" type="radio" name="clr-format" value="hex"><label for="clr-f1">Hex</label><input id="clr-f2" type="radio" name="clr-format" value="rgb"><label for="clr-f2">RGB</label><input id="clr-f3" type="radio" name="clr-format" value="hsl"><label for="clr-f3">HSL</label><span></span></fieldset></div><div id="clr-swatches" class="clr-swatches"><div><button type="button" id="clr-swatch-0" aria-labelledby="clr-swatch-label clr-swatch-0" style="color: #264653;">#264653</button><button type="button" id="clr-swatch-1" aria-labelledby="clr-swatch-label clr-swatch-1" style="color: #2a9d8f;">#2a9d8f</button><button type="button" id="clr-swatch-2" aria-labelledby="clr-swatch-label clr-swatch-2" style="color: #e9c46a;">#e9c46a</button><button type="button" id="clr-swatch-3" aria-labelledby="clr-swatch-label clr-swatch-3" style="color: #f4a261;">#f4a261</button><button type="button" id="clr-swatch-4" aria-labelledby="clr-swatch-label clr-swatch-4" style="color: #e76f51;">#e76f51</button><button type="button" id="clr-swatch-5" aria-labelledby="clr-swatch-label clr-swatch-5" style="color: #d62828;">#d62828</button><button type="button" id="clr-swatch-6" aria-labelledby="clr-swatch-label clr-swatch-6" style="color: #023e8a;">#023e8a</button><button type="button" id="clr-swatch-7" aria-labelledby="clr-swatch-label clr-swatch-7" style="color: #0077b6;">#0077b6</button><button type="button" id="clr-swatch-8" aria-labelledby="clr-swatch-label clr-swatch-8" style="color: #0096c7;">#0096c7</button><button type="button" id="clr-swatch-9" aria-labelledby="clr-swatch-label clr-swatch-9" style="color: #00b4d8;">#00b4d8</button><button type="button" id="clr-swatch-10" aria-labelledby="clr-swatch-label clr-swatch-10" style="color: #48cae4;">#48cae4</button></div></div><button type="button" id="clr-clear" class="clr-clear" aria-label="Clear the selected color" style="display: none;">Clear</button><div id="clr-color-preview" class="clr-preview" style="color: rgb(0, 165, 204);"><button type="button" id="clr-close" class="clr-close" aria-label="Close color picker">Close</button></div><span id="clr-open-label" hidden="">Open color picker</span><span id="clr-swatch-label" hidden="">Color swatch</span></div> -->
 </body>
 </html>
