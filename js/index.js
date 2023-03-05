@@ -3,16 +3,22 @@
 //create better materials
 //Fehler wenn farbe geändert wird bevor igc geladen ist
 //selection info
+//try catch error handling
+//input sperre whärend dem fly to
 
 //INITIALISATION
 // Grant CesiumJS access to your ion assets
 Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIxZjc3YWRjOS1iN2Y1LTRmMTEtOGIzZS0yYjJkOWJhMzI0YWQiLCJpZCI6MTIyNjI2LCJpYXQiOjE2NzQ5OTg3NzZ9.6jxTIuBLXZWLhwGAK1Qoli6KC1PMgxXZoDgaizIVkXI";
 
+var extent = Cesium.Rectangle.fromDegrees(5.071520, 46.747998, 16.250398, 55.566948);
+
+Cesium.Camera.DEFAULT_VIEW_RECTANGLE = extent;
+Cesium.Camera.DEFAULT_VIEW_FACTOR = 0;
+
 const viewer = new Cesium.Viewer('cesiumContainer', {
   timeline: false,
   sceneModePicker: false,
   animation: false,
-  // creditContainer : false,
   CredentialsContainer: false,
   terrainProvider: Cesium.createWorldTerrain()
 });
@@ -63,7 +69,6 @@ const igcButton = document.getElementById('inputButton');
 igcButton.classList.add("cesium-button", "cesium-toolbar-button");/////////////////////////////////////
 toolbar.insertBefore(igcButton, modeButton);
 
-
 // SHADER-BUTTON (Forms)
 // const shdButton = document.createElement('button');
 const shdButton = document.getElementById('shaders');
@@ -112,8 +117,15 @@ const shadowCheckboxLabel = document.getElementById('checkDiv');
 shadowCheckboxLabel.classList.add("cesium-button");//, "cesium-toolbar-button"
 toolbar.insertBefore(shadowCheckboxLabel, modeButton);
 
-shadowCheckbox.addEventListener('change',(event) => {
-  if(shadowCheckbox.checked){
+// shadowCheckbox.addEventListener('change',(event) => {
+//   toggleShadow();
+// })
+shadowCheckbox.addEventListener('change',toggleShadow)
+
+function toggleShadow(){
+  console.log("toggle started")
+  try {
+    if(shadowCheckbox.checked){
       //if entity shadow was already created
       if(typeof entityShadow == 'undefined' || entityShadow.length == 0){
           //and if a file was selected to load from
@@ -135,10 +147,15 @@ shadowCheckbox.addEventListener('change',(event) => {
   } else {
       if(entityShadow != []){
           console.log('entityShadows visible = false')
-          entityShadow.polyline.show = new Cesium.ConstantProperty(false);
+          if (typeof entityShadow.polyline != "undefined") {
+            entityShadow.polyline.show = new Cesium.ConstantProperty(false);
+          }
       }
   };
-})
+  } catch (error) {
+    console.log("Error: "+error);
+  }
+}
 
 //COLORPICKER
 
@@ -221,10 +238,13 @@ fileInput.addEventListener('change', (event) => {
     reader.addEventListener('load', (event) => {
         // Delete all (previous) polylines
     
-
+        //remove old entities
         for (var i = 0; i < viewer.entities.values.length; ++i) {
           viewer.entities.remove(viewer.entities.values[i]);
         };
+        console.log("removing old poly finished");
+        entityShadow=[];
+       
         // Get the file contents as a string
         igcData = event.target.result;
         jsonResult = convertIgcToJson(igcData);//converts to json for formatting and parsing
@@ -274,7 +294,7 @@ fileInput.addEventListener('change', (event) => {
           positions = [];
           for (let i = 0; i < flightData.length; i++) {
             const dataPoint = flightData[i];
-            dataPoint.altitude=dataPoint.altitude-0;
+            // dataPoint.altitude=dataPoint.altitude-heightCorrection;
             positions.push(Cesium.Cartesian3.fromDegrees(dataPoint.longitude, dataPoint.latitude, dataPoint.altitude));
           };
           //add entities to map
@@ -287,6 +307,9 @@ fileInput.addEventListener('change', (event) => {
               material: defaultMaterial,
               }
           });
+          
+          //if new igc is loaded check if shadow is toggled
+          toggleShadow();
 
           //add point to start and end
           // let entityStartEnd = [];
@@ -303,6 +326,7 @@ fileInput.addEventListener('change', (event) => {
         const firstCoordinate = Cesium.Cartesian3.fromDegrees(flightData[0].longitude, flightData[0].latitude, flightData[0].altitude);
         const firstCameraPos = Cesium.Cartesian3.fromDegrees(flightData[0].longitude, flightData[0].latitude, flightData[0].altitude+1000);
         // viewer.camera.lookAt(firstCoordinate, new Cesium.HeadingPitchRange(0, Cesium.Math.toRadians(-90)));
+        
         viewer.camera.flyTo({
           destination : firstCameraPos,
           orientation: {
@@ -312,6 +336,7 @@ fileInput.addEventListener('change', (event) => {
           },
           duration: 3
         });
+        // viewer.zoomTo(viewer.entities);
     });
     //enable manipulators
     button.disabled = false;
@@ -333,21 +358,21 @@ function convertIgcToJson(igcData) {
       // Check if the line starts with the "B" record identifier
       if (line.startsWith('B')) {
           // Extract the latitude, longitude, and altitude from the line
-          const latitude = line.substring(7, 15);
-          const longitude = line.substring(15, 24);
-          const altitude = line.substring(25, 30);
-         
+
+          //0  1    6  7     14 15     23   25 29 30 34
+          //B  HHMMSS  DDMMmmmN DDDMMmmmE A PPPPP GGGGG
+
+          const latitude = line.substring(7, 15);//7,15
+          const longitude = line.substring(15, 24);//15, 24
+          const altitude = line.substring(25, 30);//25, 30 //30, 35
           // Convert the latitude and longitude to decimal degrees
           const latDecimal = parseFloat(latitude.slice(0, 2)) + parseFloat(latitude.slice(2, 7)) / 6e4;
           const lonDecimal = parseFloat(longitude.slice(0, 3)) + parseFloat(longitude.slice(3, 8)) / 6e4;
-          
           // Convert the altitude to meters
           const altMeters = parseFloat(altitude);
-
           //ADD for South/West values
-          // if(latitude.charAt(23)="S"){latDecimal=latDecimal*(-1)};
-          // if(longitude.charAt(14)="W"){lonDecimal=lonDecimal*(-1)};
-
+          if(latitude.charAt(23)=="S"){latDecimal=latDecimal*(-1)};
+          if(longitude.charAt(14)=="W"){lonDecimal=lonDecimal*(-1)};
           // Add the data to the jsonData array as an object
           jsonData.push({
               latitude: latDecimal,
