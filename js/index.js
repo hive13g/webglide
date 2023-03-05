@@ -28,6 +28,22 @@ const viewer = new Cesium.Viewer('cesiumContainer', {
   })
 });
 
+let img = document.getElementById('img')
+  let time = 1000 // time in milliseconds
+  img.style.opacity = 0; // set img to hidden on load
+  setTimeout(()=> {
+    img.style.opacity = 1; // after timeout show img
+  }, time)
+
+  viewer.scene.globe.tileLoadProgressEvent.addEventListener(function (queuedTileCount) {
+    console.log(queuedTileCount);
+    console.log(viewer.scene.globe.tilesLoaded);
+
+    if(viewer.scene.globe.tilesLoaded){
+      img.style.opacity = 0;
+    }
+});
+
 // const weather = new Cesium.WebMapTileServiceImageryProvider({
 //   url : 'https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/AMSR2_Snow_Water_Equivalent/default/{Time}/{TileMatrixSet}/{TileMatrix}/{TileRow}/{TileCol}.png',
 //   layer : 'AMSR2_Snow_Water_Equivalent',
@@ -260,8 +276,6 @@ fileInput.addEventListener('change', (event) => {
           viewer.entities.remove(viewer.entities.values[i]);
         };
         console.log("removing old poly finished");
-        
-        
        
         // Get the file contents as a string
         igcData = event.target.result;
