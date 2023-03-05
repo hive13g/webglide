@@ -5,6 +5,8 @@
 //selection info
 //try catch error handling
 //input sperre whärend dem fly to
+//reload same map with shadows on problem
+
 
 //INITIALISATION
 // Grant CesiumJS access to your ion assets
@@ -20,18 +22,35 @@ const viewer = new Cesium.Viewer('cesiumContainer', {
   sceneModePicker: false,
   animation: false,
   CredentialsContainer: false,
-  terrainProvider: Cesium.createWorldTerrain()
+  terrainProvider: Cesium.createWorldTerrain({
+    requestWaterMask : true,
+    requestVertexNormals : true
+  })
 });
+
+// const weather = new Cesium.WebMapTileServiceImageryProvider({
+//   url : 'https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/AMSR2_Snow_Water_Equivalent/default/{Time}/{TileMatrixSet}/{TileMatrix}/{TileRow}/{TileCol}.png',
+//   layer : 'AMSR2_Snow_Water_Equivalent',
+//   style : 'default',
+//   tileMatrixSetID : '2km',
+//   maximumLevel : 5,
+//   format : 'image/png',
+//   clock: clock,
+//   times: times,
+//   credit : new Cesium.Credit('NASA Global Imagery Browse Services for EOSDIS')
+// });
+// viewer.imageryLayers.addImageryProvider(weather);
+
 document.getElementById('shadowCheckboxId').checked = false;
 
 //for standart color picker
-String.prototype.convertToRGB = function(){
+String.prototype.convertToRGB = function(alpha){
   var aRgbHex = this.match(/#([0-9A-F]{2})([0-9A-F]{2})([0-9A-F]{2})/i).slice(1);
   return new Cesium.Color(
               Cesium.Color.byteToFloat(parseInt(aRgbHex[0], 16)),
               Cesium.Color.byteToFloat(parseInt(aRgbHex[1], 16)),
               Cesium.Color.byteToFloat(parseInt(aRgbHex[2], 16)),
-              1
+              alpha
              );
 }
 
@@ -39,7 +58,6 @@ String.prototype.convertToRGB = function(){
 // viewer.terrainProvider = new Cesium.CesiumTerrainProvider({
 //   url: 'https://api.maptiler.com/tiles/terrain-quantized-mesh/?key=dW6k66j5cVBmkPBjZaAH' // get your own key at https://cloud.maptiler.com/
 // });
-
 
 // VISUAL SETTINGS
 viewer.scene.globe.depthTestAgainstTerrain = true;
@@ -56,9 +74,8 @@ let positions = [];
 let entity = [];
 let entityShadow = [];
 let entityPoints = [];
-let defaultColor = '#EEEEEE';
-let pickedHexColor = defaultColor.convertToRGB();
-
+let defaultColor = '#FFB01E';
+let pickedHexColor = defaultColor.convertToRGB(1);
 
 // Buttons for Loading igc, selecting shader & Colorpicker
 // IGC-BUTTON
@@ -175,7 +192,7 @@ var hueb = new Huebee( colorInput, {
     // string, '.color-text' => sets elements that match selector
     // default: true
     setBGColor: false,
-    customColors: [ '#FFE66D', '#C6E0FF', '#4ECDC4', '#FF6B6B' ],// custom colors added to the top of the grid
+    customColors: [ '#FFB01E', '#55FF11', '#00BBFF', '#FF3D91', '#2B83FF' ],// custom colors added to the top of the grid
     staticOpen: false,
     className: 'color-input-picker',
 });
@@ -188,9 +205,9 @@ button.disabled = true;
 button.style.background=defaultColor;
 
 hueb.on( 'change', function( color, hue, sat, lum ) {
-  entity.polyline.material.color = color.convertToRGB();
-  console.log( 'color changed to: ' + color.convertToRGB())
-  pickedHexColor = color.convertToRGB();
+  entity.polyline.material.color = color.convertToRGB(1);
+  console.log( 'color changed to: ' + color.convertToRGB(1))
+  pickedHexColor = color.convertToRGB(1);
   button.style.background=color;
   hueb.close();
 })
@@ -213,11 +230,11 @@ hueb.on( 'change', function( color, hue, sat, lum ) {
 // })
 
 //MATERIALS
-var material1 = new Cesium.PolylineOutlineMaterialProperty({color: pickedHexColor, outlineWidth: 3});
+var material1 = new Cesium.PolylineGlowMaterialProperty({glowPower: 0.1, taperPower: 1, color: pickedHexColor}); 
 var material2 = new Cesium.PolylineGlowMaterialProperty({glowPower: 0.6, taperPower: 1, color: pickedHexColor});
 var material3 = new Cesium.PolylineOutlineMaterialProperty({color: pickedHexColor, outlineColor: Cesium.Color.WHITE, outlineWidth: 3});
-var material4 = new Cesium.PolylineGlowMaterialProperty({glowPower: 0.1, taperPower: 1, color: pickedHexColor}); 
-var material5 = new Cesium.PolylineOutlineMaterialProperty({color: Cesium.Color.GREY, outlineWidth: 1});
+var material4 = new Cesium.PolylineOutlineMaterialProperty({color: pickedHexColor, outlineWidth: 3});
+var material5 = new Cesium.PolylineGlowMaterialProperty({glowPower: 0.2, taperPower: 1, color: Cesium.Color.GREY});
 var defaultMaterial = material1;
 
 const materialSelect = document.getElementById('shaders');
@@ -243,7 +260,8 @@ fileInput.addEventListener('change', (event) => {
           viewer.entities.remove(viewer.entities.values[i]);
         };
         console.log("removing old poly finished");
-        entityShadow=[];
+        
+        
        
         // Get the file contents as a string
         igcData = event.target.result;
@@ -274,7 +292,7 @@ fileInput.addEventListener('change', (event) => {
         viewer.scene.globe.depthTestAgainstTerrain = true;
         let xcoo = Cesium.Cartographic.fromDegrees(flightData[0].longitude,flightData[0].latitude);
         
-        let heightCorrectionCheck = heightCorrection;
+        heightCorrection="";
 
         Cesium.sampleTerrain(viewer.terrainProvider, 9, [xcoo])
         .then(function(samples) {
@@ -287,7 +305,7 @@ fileInput.addEventListener('change', (event) => {
         //waiting for heightCorrection to be determined
         (async() => {
           console.log("waiting for variable");
-          while(heightCorrection == undefined || heightCorrection == heightCorrectionCheck)
+          while(heightCorrection == undefined || heightCorrection == "")
               await new Promise(resolve => setTimeout(resolve, 1000));
           //here heightCorrection is defined
           console.log('Korrektur beträgt: '+ heightCorrection);
@@ -295,8 +313,10 @@ fileInput.addEventListener('change', (event) => {
           for (let i = 0; i < flightData.length; i++) {
             const dataPoint = flightData[i];
             // dataPoint.altitude=dataPoint.altitude-heightCorrection;
+            dataPoint.altitude=dataPoint.altitude+50;
             positions.push(Cesium.Cartesian3.fromDegrees(dataPoint.longitude, dataPoint.latitude, dataPoint.altitude));
           };
+
           //add entities to map
           console.log("positions defined");
           entity =[];
@@ -309,34 +329,90 @@ fileInput.addEventListener('change', (event) => {
           });
           
           //if new igc is loaded check if shadow is toggled
+          entityShadow =[];
           toggleShadow();
+          changeShader();
 
           //add point to start and end
-          // let entityStartEnd = [];
-          //     entityStartEnd = viewer.entities.add({
-          //     positions: positions[0],
-          //     point: {pixelSize: 5, color: Cesium.Color.RED}
-          // });
+          let entityStartEnd = [];
+              entityStartEnd = viewer.entities.add({
+              positions: Cesium.Cartesian3.fromDegrees(flightData[0].longitude, flightData[0].latitude, flightData[0].altitude),
+              point: {pixelSize: 10, color: Cesium.Color.RED}
+          });
       
           console.log("entities loaded");
         })();
         //console.log("above code doesn't block main function stack");
 
         // get the first coordinate and Camera Position
-        const firstCoordinate = Cesium.Cartesian3.fromDegrees(flightData[0].longitude, flightData[0].latitude, flightData[0].altitude);
-        const firstCameraPos = Cesium.Cartesian3.fromDegrees(flightData[0].longitude, flightData[0].latitude, flightData[0].altitude+1000);
-        // viewer.camera.lookAt(firstCoordinate, new Cesium.HeadingPitchRange(0, Cesium.Math.toRadians(-90)));
+        // const firstCoordinate = Cesium.Cartesian3.fromDegrees(flightData[0].longitude, flightData[0].latitude, flightData[0].altitude);
         
+        let latMax=flightData[0].latitude;
+        let latMin=flightData[0].latitude;
+        let lonMax=flightData[0].longitude;
+        let lonMin=flightData[0].longitude;
+        
+        for(let i = 0; i < flightData.length-1; i++){
+          if(flightData[i].latitude > latMax){
+            latMax = flightData[i].latitude;
+          } else if(flightData[i].latitude < latMin){
+            latMin = flightData[i].latitude;
+          }
+          if(flightData[i].longitude > lonMax){
+            lonMax = flightData[i].longitude;
+          } else if(flightData[i].longitude < lonMin){
+            lonMin = flightData[i].longitude;
+          }
+        }
+
+       
+          //to check the rectangle
+          // entity = viewer.entities.add({
+          //   rectangle: {
+          //     coordinates: Cesium.Rectangle.fromDegrees(lonMin, latMin, lonMax, latMax),
+          //     material: Cesium.Color.ORANGE
+          //     }
+          // });
+
+        console.log('LON_MAX: '+lonMax);
+        console.log('LAT_MAX: '+latMax);
+        console.log('LON_MIN: '+lonMin);
+        console.log('LAT_MIN: '+latMin);
+    
+        // const firstCameraPos = Cesium.Cartesian3.fromDegrees(lonAvg, latAvg, flightData[0].altitude+2000);
+
+        // let targetCamRectangle = viewer.camera.getRectangleCameraCoordinates(new Cesium.Rectangle.fromDegrees(lonMin, latMin, lonMax, latMax));//west south east north 
+        //applying factors
+        let rf = 1.0001; //zoom factor by maximizing the rectangle
+        if (lonMin>0){
+          lonMin=lonMin*(1-(rf-1))
+        } else {
+          lonMin=lonMin*rf
+        }
+        if (latMin>0){
+          latMin=latMin*(1-(rf-1))
+        } else {
+          latMin=latMin*rf
+        }
+        if (lonMax>0){
+          lonMax=lonMax*rf
+        } else {
+          lonMax=lonMax*(1-(rf-1))
+        }
+        if (latMax>0){
+          latMax=latMax*rf
+        } else {
+          latMax=latMax*(1-(rf-1))
+        };
+
+        let targetCamRectangle = new Cesium.Rectangle.fromDegrees(lonMin, latMin, lonMax, latMax);
         viewer.camera.flyTo({
-          destination : firstCameraPos,
+          destination : targetCamRectangle,
           orientation: {
-            // heading : Cesium.Math.toRadians(0),
-            // pitch : Cesium.Math.toRadians(-90),
             roll : 0.0
           },
           duration: 3
-        });
-        // viewer.zoomTo(viewer.entities);
+        }); 
     });
     //enable manipulators
     button.disabled = false;
@@ -364,7 +440,7 @@ function convertIgcToJson(igcData) {
 
           const latitude = line.substring(7, 15);//7,15
           const longitude = line.substring(15, 24);//15, 24
-          const altitude = line.substring(25, 30);//25, 30 //30, 35
+          const altitude = line.substring(30);//25, 30 //30, 35
           // Convert the latitude and longitude to decimal degrees
           const latDecimal = parseFloat(latitude.slice(0, 2)) + parseFloat(latitude.slice(2, 7)) / 6e4;
           const lonDecimal = parseFloat(longitude.slice(0, 3)) + parseFloat(longitude.slice(3, 8)) / 6e4;
