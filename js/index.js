@@ -41,6 +41,7 @@ let img = document.getElementById('img')
 
     if(viewer.scene.globe.tilesLoaded){
       img.style.opacity = 0;
+      img.style.zIndex = -1;
     }
 });
 
