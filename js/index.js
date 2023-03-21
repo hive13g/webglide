@@ -12,9 +12,9 @@
 // Grant CesiumJS access to your ion assets
 Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIxZjc3YWRjOS1iN2Y1LTRmMTEtOGIzZS0yYjJkOWJhMzI0YWQiLCJpZCI6MTIyNjI2LCJpYXQiOjE2NzQ5OTg3NzZ9.6jxTIuBLXZWLhwGAK1Qoli6KC1PMgxXZoDgaizIVkXI";
 
-var extent = Cesium.Rectangle.fromDegrees(5.071520, 46.747998, 16.250398, 55.566948);
+var defaultExtent = Cesium.Rectangle.fromDegrees(5.071520, 46.747998, 16.250398, 55.566948);
 
-Cesium.Camera.DEFAULT_VIEW_RECTANGLE = extent;
+Cesium.Camera.DEFAULT_VIEW_RECTANGLE = defaultExtent;
 Cesium.Camera.DEFAULT_VIEW_FACTOR = 0;
 
 const viewer = new Cesium.Viewer('cesiumContainer', {
@@ -29,20 +29,24 @@ const viewer = new Cesium.Viewer('cesiumContainer', {
 });
 
 let img = document.getElementById('img')
-  let time = 1000 // time in milliseconds
-  img.style.opacity = 0; // set img to hidden on load
-  setTimeout(()=> {
-    img.style.opacity = 1; // after timeout show img
-  }, time)
+let time = 1000 // time in milliseconds
+img.style.opacity = 0; // set img to hidden on load
+setTimeout(()=> {
+  img.style.opacity = 1; // after timeout show img
+}, time)
 
-  viewer.scene.globe.tileLoadProgressEvent.addEventListener(function (queuedTileCount) {
-    console.log(queuedTileCount);
-    console.log(viewer.scene.globe.tilesLoaded);
+viewer.scene.globe.tileLoadProgressEvent.addEventListener(function (queuedTileCount) {
+  // console.log(queuedTileCount);
+  // console.log(viewer.scene.globe.tilesLoaded);
 
-    if(viewer.scene.globe.tilesLoaded){
-      img.style.opacity = 0;
-      img.style.zIndex = -1;
-    }
+  if(viewer.scene.globe.tilesLoaded){
+    img.style.opacity = 0;
+    setTimeout(()=> {
+      img.style.zIndex = -1; // after timeout show img
+    }, time);
+
+    
+  }
 });
 
 // const weather = new Cesium.WebMapTileServiceImageryProvider({
@@ -111,6 +115,7 @@ document.getElementById('shaders').selectedIndex = 0;
 shdButton.classList.add("cesium-button");
 toolbar.insertBefore(shdButton, modeButton);
 
+
 //Change SHADER (Forms)
 function changeShader(){
   switch(materialSelect.value){
@@ -150,6 +155,7 @@ shadowCheckbox.disabled = true;
 const shadowCheckboxLabel = document.getElementById('checkDiv');
 shadowCheckboxLabel.classList.add("cesium-button");//, "cesium-toolbar-button"
 toolbar.insertBefore(shadowCheckboxLabel, modeButton);
+
 
 // shadowCheckbox.addEventListener('change',(event) => {
 //   toggleShadow();
@@ -218,6 +224,7 @@ let button = document.getElementById('inputPicker');
 button.classList.add("cesium-button");//, "cesium-toolbar-button"
 toolbar.insertBefore(button, modeButton);
 button.disabled = true;
+
 
 button.style.background=defaultColor;
 
@@ -389,10 +396,10 @@ fileInput.addEventListener('change', (event) => {
           //     }
           // });
 
-        console.log('LON_MAX: '+lonMax);
-        console.log('LAT_MAX: '+latMax);
-        console.log('LON_MIN: '+lonMin);
-        console.log('LAT_MIN: '+latMin);
+        // console.log('LON_MAX: '+lonMax);
+        // console.log('LAT_MAX: '+latMax);
+        // console.log('LON_MIN: '+lonMin);
+        // console.log('LAT_MIN: '+latMin);
     
         // const firstCameraPos = Cesium.Cartesian3.fromDegrees(lonAvg, latAvg, flightData[0].altitude+2000);
 
@@ -428,6 +435,9 @@ fileInput.addEventListener('change', (event) => {
           },
           duration: 3
         }); 
+        //set home button to flight track
+        Cesium.Camera.DEFAULT_VIEW_RECTANGLE = targetCamRectangle;
+        Cesium.Camera.DEFAULT_VIEW_FACTOR = 0;
     });
     //enable manipulators
     button.disabled = false;
