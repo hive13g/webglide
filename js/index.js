@@ -1,11 +1,6 @@
 //TODO:
-//get rid of unfunctional maps
-//create better materials
-//Fehler wenn farbe geändert wird bevor igc geladen ist
-//selection info
-//try catch error handling
-//input sperre whärend dem fly to
-//reload same map with shadows on problem
+//only a few predefined Styles
+//make an icon for map selecton
 
 
 //INITIALISATION
@@ -18,6 +13,7 @@ Cesium.Camera.DEFAULT_VIEW_RECTANGLE = defaultExtent;
 Cesium.Camera.DEFAULT_VIEW_FACTOR = 0;
 
 const viewer = new Cesium.Viewer('cesiumContainer', {
+  baseLayerPicker: false,
   timeline: false,
   sceneModePicker: false,
   animation: false,
@@ -85,6 +81,15 @@ viewer.scene.globe.depthTestAgainstTerrain = true;
 viewer.scene.postProcessStages.fxaa.enabled = true;
 viewer.forceResize();
 const osmBuildings = viewer.scene.primitives.add(Cesium.createOsmBuildings());
+const baseLayerPicker = viewer.baseLayerPicker;
+// Get the Viewer container element
+const viewerContainer = document.getElementById('cesiumContainer');
+
+// Find the BaseLayerPicker element within the Viewer container
+// const baseLayerPickerElement = viewerContainer.querySelector('.cesium-baseLayerPicker-dropDown');
+// Find the BaseLayerPicker button element within the Viewer container
+// const baseLayerPickerButton = viewerContainer.querySelector('baseLayerPickerContainer');
+// baseLayerPickerButton.innerHTML = 'Text';
 
 //VARIABLES
 let igcData;
@@ -92,6 +97,8 @@ let jsonResult;
 let flightData;
 let heightCorrection;
 let positions = [];
+let planePositions = [];
+let plane = [];
 let entity = [];
 let entityShadow = [];
 let entityPoints = [];
@@ -104,7 +111,7 @@ window.viewer = viewer;
 const toolbar = document.querySelector("div.cesium-viewer-toolbar");
 const modeButton = document.querySelector("span.cesium-sceneModePicker-wrapper");
 const igcButton = document.getElementById('inputButton');
-igcButton.classList.add("cesium-button", "cesium-toolbar-button");/////////////////////////////////////
+igcButton.classList.add("cesium-button", "cesium-toolbar-button");
 toolbar.insertBefore(igcButton, modeButton);
 
 // SHADER-BUTTON (Forms)
@@ -122,22 +129,34 @@ function changeShader(){
     case 's1':
       entity.polyline.material = material1;
       entity.polyline.material.color = pickedHexColor;
+      plane.polyline.material = material1;
+      plane.polyline.material.color = pickedHexColor;
       console.log("material1: "+entity.polyline.material.color);
+      plane.polyline.show = new Cesium.ConstantProperty(false);
       break;
     case 's2':
       entity.polyline.material = material2;
       entity.polyline.material.color = pickedHexColor;
+      plane.polyline.material = material2;
+      plane.polyline.material.color = pickedHexColor;
       console.log("material2: "+entity.polyline.material.color);
+      plane.polyline.show = new Cesium.ConstantProperty(true);
       break;
     case 's3':
       entity.polyline.material = material3;
       entity.polyline.material.color = pickedHexColor;
+      plane.polyline.material = material3;
+      plane.polyline.material.color = pickedHexColor;
       console.log("material3: "+entity.polyline.material.color);
+      plane.polyline.show = new Cesium.ConstantProperty(true);
       break;
     case 's4':
       entity.polyline.material = material4;
       entity.polyline.material.color = pickedHexColor;
+      plane.polyline.material = material4;
+      plane.polyline.material.color = pickedHexColor;
       console.log("material4: "+entity.polyline.material.color);
+      plane.polyline.show = new Cesium.ConstantProperty(false);
       break;
     default:
       entity.polyline.material = defaultMaterial;
@@ -175,7 +194,7 @@ function toggleShadow(){
               entityShadow = viewer.entities.add({
                 polyline: {
                   positions: positions,
-                  width: 5,
+                  width: 10,
                   material: material5,
                   clampToGround: true
                   }
@@ -236,29 +255,12 @@ hueb.on( 'change', function( color, hue, sat, lum ) {
   hueb.close();
 })
 
-//STANDARD PICKER
-// const colButton = document.createElement('input');
-// colButton.type = 'color';
-// colButton.id = 'colButton';
-// colButton.value = '#0066ff';//default color
-// colButton.disabled = true;
-// colButton.classList.add("cesium-button", "cesium-toolbar-button");
-// toolbar.insertBefore(colButton, modeButton);
-// var pickedHexColor = colButton.value
-// var polyRgbColor = pickedHexColor.convertToRGB();
-
-// colButton.addEventListener('change',(event) => {
-//   polyRgbColor = pickedHexColor.convertToRGB();
-//   pickedHexColor = colButton.value;
-//   entity.polyline.material.color = pickedHexColor.convertToRGB();
-// })
-
 //MATERIALS
 var material1 = new Cesium.PolylineGlowMaterialProperty({glowPower: 0.1, taperPower: 1, color: pickedHexColor}); 
 var material2 = new Cesium.PolylineGlowMaterialProperty({glowPower: 0.6, taperPower: 1, color: pickedHexColor});
 var material3 = new Cesium.PolylineOutlineMaterialProperty({color: pickedHexColor, outlineColor: Cesium.Color.WHITE, outlineWidth: 3});
 var material4 = new Cesium.PolylineOutlineMaterialProperty({color: pickedHexColor, outlineWidth: 3});
-var material5 = new Cesium.PolylineGlowMaterialProperty({glowPower: 0.2, taperPower: 1, color: Cesium.Color.GREY});
+var material5 = new Cesium.PolylineGlowMaterialProperty({glowPower: 0.4, taperPower: 1, color: Cesium.Color.GREY});
 var defaultMaterial = material1;
 
 const materialSelect = document.getElementById('shaders');
@@ -331,6 +333,7 @@ fileInput.addEventListener('change', (event) => {
               await new Promise(resolve => setTimeout(resolve, 1000));
           //here heightCorrection is defined
           console.log('Korrektur beträgt: '+ heightCorrection);
+
           positions = [];
           for (let i = 0; i < flightData.length; i++) {
             const dataPoint = flightData[i];
@@ -339,7 +342,17 @@ fileInput.addEventListener('change', (event) => {
             positions.push(Cesium.Cartesian3.fromDegrees(dataPoint.longitude, dataPoint.latitude, dataPoint.altitude));
           };
 
-          //add entities to map
+          planePositions = [];
+          for (let i = 0; i < flightData.length; i++) {
+            const dataPoint = flightData[i];
+            // dataPoint.altitude=dataPoint.altitude-heightCorrection;
+            // dataPoint.altitude=dataPoint.altitude+50;
+            planePositions.push(Cesium.Cartesian3.fromDegrees(dataPoint.longitude, dataPoint.latitude, dataPoint.altitude));
+            planePositions.push(Cesium.Cartesian3.fromDegrees(dataPoint.longitude, dataPoint.latitude, 0));
+            planePositions.push(Cesium.Cartesian3.fromDegrees(dataPoint.longitude, dataPoint.latitude, dataPoint.altitude));
+          };
+
+          //////////////////////////////////////////////////
           console.log("positions defined");
           entity =[];
           entity = viewer.entities.add({
@@ -350,19 +363,41 @@ fileInput.addEventListener('change', (event) => {
               }
           });
           
+          plane = [];
+          plane = viewer.entities.add({
+            polyline: {
+              positions: planePositions,
+              width: 5,
+              material: defaultMaterial,
+              }
+          });
+          /////////////////////////////////////////////////
+
           //if new igc is loaded check if shadow is toggled
           entityShadow =[];
           toggleShadow();
           changeShader();
 
           //add point to start and end
-          let entityStartEnd = [];
-              entityStartEnd = viewer.entities.add({
-              positions: Cesium.Cartesian3.fromDegrees(flightData[0].longitude, flightData[0].latitude, flightData[0].altitude),
-              point: {pixelSize: 10, color: Cesium.Color.RED}
-          });
+          // let entityStartEnd = [];
+          //     entityStartEnd = viewer.entities.add({
+          //     positions: Cesium.Cartesian3.fromDegrees(flightData[0].longitude, flightData[0].latitude, flightData[0].altitude+50),
+          //     point: {pixelSize: 1000, color: Cesium.Color.RED}
+          // });
       
           console.log("entities loaded");
+
+          // Create a billboard collection with two billboards
+          // var billboards = scene.primitives.add(new Cesium.BillboardCollection());
+          // billboards.add({
+          //   position : new Cesium.Cartesian3(flightData[0].latitude, flightData[0].longitude, flightData[0].altitude+50),
+          //   image : 'images/logo.png'
+          // });
+          // billboards.add({
+          //   position : new Cesium.Cartesian3(4.0, 5.0, 6.0),
+          //   image : 'url/to/another/image'
+          // });
+
         })();
         //console.log("above code doesn't block main function stack");
 
@@ -460,12 +495,12 @@ function convertIgcToJson(igcData) {
       if (line.startsWith('B')) {
           // Extract the latitude, longitude, and altitude from the line
 
-          //0  1    6  7     14 15     23   25 29 30 34
-          //B  HHMMSS  DDMMmmmN DDDMMmmmE A PPPPP GGGGG
+          //0  1    6  7     14 15     23   25 29 30 34 35 36
+          //B  HHMMSS  DDMMmmmN DDDMMmmmE A PPPPP GGGGG CR LF
 
           const latitude = line.substring(7, 15);//7,15
           const longitude = line.substring(15, 24);//15, 24
-          const altitude = line.substring(30);//25, 30 //30, 35
+          const altitude = line.substring(30, 35);//25, 30 //30, 35
           // Convert the latitude and longitude to decimal degrees
           const latDecimal = parseFloat(latitude.slice(0, 2)) + parseFloat(latitude.slice(2, 7)) / 6e4;
           const lonDecimal = parseFloat(longitude.slice(0, 3)) + parseFloat(longitude.slice(3, 8)) / 6e4;
